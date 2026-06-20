@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>포켓몬 굿즈샵</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Malgun Gothic', sans-serif;
+    background: #fff8e1;
+    color: #2c2c2c;
+  }
+  header {
+    background: linear-gradient(135deg, #ffcb05 0%, #f7a800 100%);
+    padding: 24px 40px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .logo {
+    font-size: 28px;
+    font-weight: 900;
+    color: #2c5fa8;
+    text-shadow: 2px 2px 0 #2c5fa8, 2px 2px 0 #fff, 4px 4px 0 #2c5fa8;
+    -webkit-text-stroke: 1px #2c5fa8;
+  }
+  nav { display: flex; gap: 28px; align-items: center; }
+  nav a {
+    text-decoration: none;
+    color: #2c5fa8;
+    font-weight: 600;
+    font-size: 16px;
+    transition: opacity 0.2s;
+  }
+  nav a:hover { opacity: 0.7; }
+  .cart-btn {
+    background: #2c5fa8;
+    color: #ffcb05;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 24px;
+    font-weight: 700;
+    cursor: pointer;
+    font-size: 15px;
+    position: relative;
+  }
+  .cart-count {
+    position: absolute;
+    top: -6px;
+    right: -6px;
+    background: #e53935;
+    color: #fff;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    font-size: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .hero {
+    background: linear-gradient(135deg, #2c5fa8 0%, #1a4480 100%);
+    color: #ffcb05;
+    padding: 60px 40px;
+    text-align: center;
+  }
+  .hero h1 { font-size: 42px; margin-bottom: 12px; }
+  .hero p { font-size: 18px; opacity: 0.9; }
+
+  .container { max-width: 1200px; margin: 0 auto; padding: 40px 20px; }
+  .section-title {
+    font-size: 26px;
+    font-weight: 800;
+    color: #2c5fa8;
+    margin-bottom: 24px;
+    padding-bottom: 8px;
+    border-bottom: 3px solid #ffcb05;
+    display: inline-block;
+  }
+
+  .products {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 24px;
+    margin-top: 20px;
+  }
+  .card {
+    background: #fff;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 4px 16px rgba(44,95,168,0.1);
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+  .card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 8px 24px rgba(44,95,168,0.2);
+  }
+  .card-img {
+    width: 100%;
+    height: 200px;
+    background: #f5f5f5;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+  }
+  .card-img img { width: 100%; height: 100%; object-fit: contain; padding: 12px; }
+  .card-body { padding: 16px; }
+  .card-title { font-size: 16px; font-weight: 700; margin-bottom: 6px; }
+  .card-desc { font-size: 13px; color: #777; margin-bottom: 12px; }
+  .card-bottom {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .price {
+    font-size: 18px;
+    font-weight: 800;
+    color: #e53935;
+  }
+  .add-btn {
+    background: #ffcb05;
+    color: #2c5fa8;
+    border: none;
+    padding: 8px 14px;
+    border-radius: 8px;
+    font-weight: 700;
+    cursor: pointer;
+    font-size: 13px;
+    transition: background 0.2s;
+  }
+  .add-btn:hover { background: #f7a800; }
+
+  /* Cart Modal */
+  .modal {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.5);
+    z-index: 200;
+    justify-content: flex-end;
+  }
+  .modal.open { display: flex; }
+  .modal-content {
+    background: #fff;
+    width: 100%;
+    max-width: 420px;
+    height: 100%;
+    padding: 24px;
+    overflow-y: auto;
+    animation: slideIn 0.3s ease;
+  }
+  @keyframes slideIn { from { transform: translateX(100%); } to { transform: translateX(0); } }
+  .modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+  }
+  .modal-header h2 { color: #2c5fa8; }
+  .close-btn {
+    background: none;
+    border: none;
+    font-size: 28px;
+    cursor: pointer;
+    color: #777;
+  }
+  .cart-item {
+    display: flex;
+    gap: 12px;
+    padding: 12px 0;
+    border-bottom: 1px solid #eee;
+    align-items: center;
+  }
+  .cart-item img { width: 60px; height: 60px; object-fit: contain; background: #f5f5f5; border-radius: 8px; }
+  .cart-item-info { flex: 1; }
+  .cart-item-name { font-weight: 600; font-size: 14px; }
+  .cart-item-price { color: #e53935; font-weight: 700; font-size: 14px; }
+  .qty-controls { display: flex; gap: 6px; align-items: center; }
+  .qty-btn {
+    width: 24px; height: 24px;
+    background: #2c5fa8;
+    color: #ffcb05;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: 700;
+  }
+  .remove-btn {
+    background: none;
+    border: none;
+    color: #999;
+    cursor: pointer;
+    font-size: 18px;
+  }
+  .cart-total {
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 2px solid #2c5fa8;
+    display: flex;
+    justify-content: space-between;
+    font-size: 20px;
+    font-weight: 800;
+  }
+  .checkout-btn {
+    width: 100%;
+    background: #2c5fa8;
+    color: #ffcb05;
+    border: none;
+    padding: 14px;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    margin-top: 16px;
+  }
+  .empty-cart {
+    text-align: center;
+    padding: 40px 0;
+    color: #999;
+  }
+
+  footer {
+    background: #2c5fa8;
+    color: #ffcb05;
+    text-align: center;
+    padding: 24px;
+    margin-top: 60px;
+  }
+</style>
+</head>
+<body>
+  <header>
+    <div class="logo">POKéMON 굿즈샵</div>
+    <nav>
+      <a href="#">홈</a>
+      <a href="#products">상품</a>
+      <a href="#">이벤트</a>
+      <a href="#">고객센터</a>
+      <button class="cart-btn" onclick="openCart()">
+        🛒 장바구니
+        <span class="cart-count" id="cartCount">0</span>
+      </button>
+    </nav>
+  </header>
+
+  <section class="hero">
+    <h1>🎉 신상품 출시! 최대 30% 할인</h1>
+    <p>오직 이번 주만! 인기 포켓몬 굿즈를 특별한 가격에 만나보세요</p>
+  </section>
+
+  <div class="container" id="products">
+    <h2 class="section-title">인기 상품</h2>
+    <div class="products" id="productList"></div>
+  </div>
+
+  <div class="modal" id="cartModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>장바구니</h2>
+        <button class="close-btn" onclick="closeCart()">×</button>
+      </div>
+      <div id="cartItems"></div>
+      <div id="cartFooter" style="display:none;">
+        <div class="cart-total">
+          <span>총 금액</span>
+          <span id="cartTotal" style="color:#e53935;">0원</span>
+        </div>
+        <button class="checkout-btn" onclick="checkout()">결제하기</button>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    <p>© 2026 포켓몬 굿즈샵 · 모든 권리 보유</p>
+  </footer>
+
+<script>
+const products = [
+  { id: 25, name: '피카츄 봉제인형', desc: '귀여운 피카츄 빅사이즈 인형', price: 29000 },
+  { id: 133, name: '이브이 봉제인형', desc: '8가지 진화 이브이 봉제인형', price: 29000 },
+  { id: 7, name: '꼬부기 미니인형', desc: '아기 꼬부기 키링 인형', price: 12000 },
+  { id: 1, name: '이상해씨 화분', desc: '이상해씨 모양 플랜트 화분', price: 18000 },
+  { id: 4, name: '파이리 불꽃머그', desc: '온도변색 파이리 머그컵', price: 14000 },
+  { id: 6, name: '리자몽 EX 피규어', desc: '한정판 리자몽 프리미엄 피규어', price: 45000 },
+  { id: 143, name: '잠만보 쿠션', desc: '푹신한 잠만보 빅쿠션', price: 35000 },
+  { id: 197, name: '루기아 포스터 세트', desc: '은혜의 루기아 일러스트 포스터', price: 22000 },
+];
+
+function imgUrl(id) {
+  return `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${id}.png`;
+}
+
+function formatPrice(n) {
+  return n.toLocaleString('ko-KR') + '원';
+}
+
+function renderProducts() {
+  const list = document.getElementById('productList');
+  list.innerHTML = products.map(p => `
+    <div class="card">
+      <div class="card-img"><img src="${imgUrl(p.id)}" alt="${p.name}" loading="lazy"></div>
+      <div class="card-body">
+        <div class="card-title">${p.name}</div>
+        <div class="card-desc">${p.desc}</div>
+        <div class="card-bottom">
+          <div class="price">${formatPrice(p.price)}</div>
+          <button class="add-btn" onclick="addToCart(${p.id})">담기</button>
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+
+let cart = [];
+function addToCart(id) {
+  const product = products.find(p => p.id === id);
+  const existing = cart.find(c => c.id === id);
+  if (existing) existing.qty++;
+  else cart.push({ ...product, qty: 1 });
+  updateCartCount();
+  alert(`${product.name}을(를) 장바구니에 담았습니다!`);
+}
+
+function updateCartCount() {
+  document.getElementById('cartCount').textContent = cart.reduce((s, c) => s + c.qty, 0);
+}
+
+function renderCart() {
+  const container = document.getElementById('cartItems');
+  const footer = document.getElementById('cartFooter');
+  if (cart.length === 0) {
+    container.innerHTML = '<div class="empty-cart">장바구니가 비어있습니다 🛒</div>';
+    footer.style.display = 'none';
+    return;
+  }
+  container.innerHTML = cart.map(item => `
+    <div class="cart-item">
+      <img src="${imgUrl(item.id)}" alt="${item.name}">
+      <div class="cart-item-info">
+        <div class="cart-item-name">${item.name}</div>
+        <div class="cart-item-price">${formatPrice(item.price * item.qty)}</div>
+      </div>
+      <div class="qty-controls">
+        <button class="qty-btn" onclick="changeQty(${item.id}, -1)">-</button>
+        <span>${item.qty}</span>
+        <button class="qty-btn" onclick="changeQty(${item.id}, 1)">+</button>
+      </div>
+      <button class="remove-btn" onclick="removeItem(${item.id})">×</button>
+    </div>
+  `).join('');
+  const total = cart.reduce((s, c) => s + c.price * c.qty, 0);
+  document.getElementById('cartTotal').textContent = formatPrice(total);
+  footer.style.display = 'block';
+}
+
+function changeQty(id, delta) {
+  const item = cart.find(c => c.id === id);
+  item.qty += delta;
+  if (item.qty <= 0) cart = cart.filter(c => c.id !== id);
+  updateCartCount();
+  renderCart();
+}
+
+function removeItem(id) {
+  cart = cart.filter(c => c.id !== id);
+  updateCartCount();
+  renderCart();
+}
+
+function openCart() {
+  document.getElementById('cartModal').classList.add('open');
+  renderCart();
+}
+function closeCart() {
+  document.getElementById('cartModal').classList.remove('open');
+}
+function checkout() {
+  if (cart.length === 0) return;
+  alert('결제가 완료되었습니다! 🎉');
+  cart = [];
+  updateCartCount();
+  renderCart();
+  closeCart();
+}
+
+document.getElementById('cartModal').addEventListener('click', (e) => {
+  if (e.target.id === 'cartModal') closeCart();
+});
+
+renderProducts();
+</script>
+</body>
+</html>
