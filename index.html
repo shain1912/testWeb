@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>학생 작품 전시관</title>
+  <title>배정미래고 학생 작품 전시관</title>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body {
@@ -34,11 +34,7 @@
     background-clip: text;
   }
   .actions { display: flex; gap: 8px; align-items: center; }
-  .data-source {
-    font-size: 12px;
-    color: #6b7280;
-    margin-right: 4px;
-  }
+  .data-source { font-size: 12px; color: #6b7280; margin-right: 4px; }
   .btn {
     padding: 8px 16px;
     border: none;
@@ -80,7 +76,7 @@
   .form-row { display: flex; gap: 8px; flex-wrap: wrap; align-items: stretch; }
   .form-row input {
     flex: 1;
-    min-width: 180px;
+    min-width: 200px;
     padding: 10px 14px;
     border: 1px solid #d1d5db;
     border-radius: 8px;
@@ -104,6 +100,16 @@
     border-radius: 4px;
     font-family: 'SF Mono', Monaco, monospace;
     font-size: 12px;
+  }
+  .help-text pre {
+    margin-top: 8px;
+    background: #1f2937;
+    color: #e5e7eb;
+    padding: 10px 12px;
+    border-radius: 6px;
+    font-family: 'SF Mono', Monaco, monospace;
+    font-size: 12px;
+    overflow-x: auto;
   }
 
   .grid {
@@ -136,12 +142,6 @@
     overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
   }
   .student-name:hover { color: #6366f1; }
-  .student-desc {
-    font-size: 12px;
-    color: #6b7280;
-    margin-top: 2px;
-    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
-  }
   .card-actions { display: flex; gap: 6px; flex-shrink: 0; }
   .icon-btn {
     width: 32px; height: 32px;
@@ -194,8 +194,7 @@
     flex-wrap: wrap;
   }
   .lightbox-title { font-size: 18px; font-weight: 700; }
-  .lightbox-desc { font-size: 13px; opacity: 0.7; margin-top: 2px; }
-  .lightbox-url { font-size: 11px; opacity: 0.5; margin-top: 2px; word-break: break-all; }
+  .lightbox-url { font-size: 11px; opacity: 0.6; margin-top: 4px; word-break: break-all; }
   .lightbox-actions { display: flex; gap: 8px; }
   .lightbox iframe { flex: 1; width: 100%; border: none; background: white; }
 
@@ -225,11 +224,14 @@
 </head>
 <body>
   <header>
-    <h1>🎨 학생 작품 전시관</h1>
+    <div>
+      <h1>🎨 배정미래고 학생 작품 전시관</h1>
+      <div style="font-size:11px; color:#6b7280; margin-top:2px; font-weight:500;">Baejeong Mirae High School · Student Works Gallery</div>
+    </div>
     <div class="actions">
       <span class="data-source" id="dataSource"></span>
-      <button class="btn-icon" id="importBtn" style="display:none;" title="JSON 가져오기">📥</button>
-      <button class="btn-icon" id="exportBtn" style="display:none;" title="JSON 내보내기">📤</button>
+      <button class="btn-icon" id="importBtn" style="display:none;" title="CSV 가져오기">📥</button>
+      <button class="btn-icon" id="exportBtn" style="display:none;" title="CSV 내보내기">📤</button>
       <button class="btn btn-primary" id="adminBtn">관리</button>
     </div>
   </header>
@@ -238,16 +240,18 @@
     <div class="admin-panel" id="adminPanel" style="display:none;">
       <h2>➕ 학생 작품 추가</h2>
       <form class="form-row" id="addForm">
-        <input type="text" id="inputName" placeholder="학생 이름 (예: 김민수)" required>
-        <input type="text" id="inputDesc" placeholder="작품 설명 (선택)">
+        <input type="text" id="inputName" placeholder="학생 이름" required>
         <input type="url" id="inputUrl" placeholder="배포 URL (https://...)" required>
         <button type="submit" class="btn btn-primary">추가</button>
       </form>
       <div class="help-text">
         💡 <strong>사용 방법</strong><br>
-        1. 학생 이름과 배포된 사이트 URL을 입력하고 "추가" 버튼을 누르세요.<br>
-        2. <strong>다른 사람에게도 보이게 하려면</strong> 📤 내보내기로 <code>students.json</code>을 받아 저장소에 커밋·푸시하세요.<br>
-        3. 데이터는 <code>students.json</code> 파일이 있으면 그 파일을, 없으면 브라우저 저장소를 사용합니다.
+        1. 학생 이름과 배포 URL을 입력하고 "추가" 버튼을 누르세요.<br>
+        2. <strong>여러 명을 한 번에 등록하려면</strong> 📥 가져오기로 아래 형식의 CSV 파일을 업로드하세요.<br>
+        3. <strong>다른 사람에게도 보이게 하려면</strong> 📤 내보내기로 <code>students.csv</code>를 받아 저장소에 커밋·푸시하세요.
+        <pre>이름,주소
+김민수,https://minju.netlify.app
+이수진,https://sujin.vercel.app</pre>
       </div>
     </div>
 
@@ -258,7 +262,6 @@
     <div class="lightbox-header">
       <div>
         <div class="lightbox-title" id="lightboxName"></div>
-        <div class="lightbox-desc" id="lightboxDesc"></div>
         <div class="lightbox-url" id="lightboxUrl"></div>
       </div>
       <div class="lightbox-actions">
@@ -269,7 +272,7 @@
     <iframe id="lightboxIframe"></iframe>
   </div>
 
-  <input type="file" id="fileInput" accept=".json,application/json" style="display:none;">
+  <input type="file" id="fileInput" accept=".csv,text/csv" style="display:none;">
 
   <div class="toast" id="toast"></div>
 
@@ -281,14 +284,17 @@ let dataSource = 'local';
 
 async function loadStudents() {
   try {
-    const res = await fetch('students.json', { cache: 'no-cache' });
+    const res = await fetch('students.csv', { cache: 'no-cache' });
     if (res.ok) {
-      const data = await res.json();
-      students = Array.isArray(data) ? data : [];
-      dataSource = 'json';
-      updateSourceLabel();
-      render();
-      return;
+      const text = await res.text();
+      const parsed = parseCSV(text);
+      if (parsed.length > 0 || text.trim() === '이름,주소' || text.trim() === '') {
+        students = parsed;
+        dataSource = 'csv';
+        updateSourceLabel();
+        render();
+        return;
+      }
     }
   } catch (e) {}
   const stored = localStorage.getItem(STORAGE_KEY);
@@ -300,9 +306,9 @@ async function loadStudents() {
 
 function updateSourceLabel() {
   const el = document.getElementById('dataSource');
-  el.textContent = dataSource === 'json' ? '📁 students.json' : '💾 브라우저 저장';
-  el.title = dataSource === 'json'
-    ? 'students.json 파일에서 데이터를 불러왔습니다'
+  el.textContent = dataSource === 'csv' ? '📁 students.csv' : '💾 브라우저 저장';
+  el.title = dataSource === 'csv'
+    ? 'students.csv 파일에서 데이터를 불러왔습니다'
     : '브라우저 로컬 저장소에서 데이터를 불러왔습니다';
 }
 
@@ -317,7 +323,7 @@ function render() {
       <div class="empty">
         <div class="empty-icon">🎨</div>
         <div class="empty-text">아직 등록된 작품이 없습니다</div>
-        <div class="empty-hint">${adminMode ? '위 폼에서 학생을 추가해보세요' : '우측 상단 "관리" 버튼을 눌러 학생을 추가하세요'}</div>
+        <div class="empty-hint">${adminMode ? '위 폼에서 학생을 추가하거나 CSV를 가져오세요' : '우측 상단 "관리" 버튼을 눌러 학생을 추가하세요'}</div>
       </div>
     `;
     return;
@@ -327,7 +333,6 @@ function render() {
       <div class="card-header">
         <div class="student-info">
           <div class="student-name" onclick="openLightbox(${i})" title="클릭하여 크게 보기">${escapeHtml(s.name)}</div>
-          ${s.desc ? `<div class="student-desc">${escapeHtml(s.desc)}</div>` : ''}
         </div>
         <div class="card-actions">
           <button class="icon-btn" onclick="openLightbox(${i})" title="확대">⛶</button>
@@ -345,8 +350,8 @@ function escapeHtml(s) {
 }
 function escapeAttr(s) { return escapeHtml(s); }
 
-function addStudent(name, desc, url) {
-  students.push({ name, desc, url });
+function addStudent(name, url) {
+  students.push({ name, url });
   saveStudents();
   render();
   showToast(`✅ ${name} 학생의 작품을 추가했습니다`);
@@ -365,7 +370,6 @@ function removeStudent(i) {
 function openLightbox(i) {
   const s = students[i];
   document.getElementById('lightboxName').textContent = s.name;
-  document.getElementById('lightboxDesc').textContent = s.desc || '';
   document.getElementById('lightboxUrl').textContent = s.url;
   document.getElementById('lightboxLink').href = s.url;
   document.getElementById('lightboxIframe').src = s.url;
@@ -397,22 +401,22 @@ document.getElementById('adminBtn').addEventListener('click', toggleAdmin);
 document.getElementById('addForm').addEventListener('submit', (e) => {
   e.preventDefault();
   const name = document.getElementById('inputName').value.trim();
-  const desc = document.getElementById('inputDesc').value.trim();
   const url = document.getElementById('inputUrl').value.trim();
   if (name && url) {
-    addStudent(name, desc, url);
+    addStudent(name, url);
     e.target.reset();
   }
 });
 
 document.getElementById('exportBtn').addEventListener('click', () => {
-  const blob = new Blob([JSON.stringify(students, null, 2)], { type: 'application/json' });
+  const csv = toCSV(students);
+  const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8' });
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
-  a.download = 'students.json';
+  a.download = 'students.csv';
   a.click();
   URL.revokeObjectURL(a.href);
-  showToast('📤 students.json 다운로드 완료');
+  showToast('📤 students.csv 다운로드 완료');
 });
 
 document.getElementById('importBtn').addEventListener('click', () => {
@@ -425,14 +429,15 @@ document.getElementById('fileInput').addEventListener('change', (e) => {
   const reader = new FileReader();
   reader.onload = (ev) => {
     try {
-      const data = JSON.parse(ev.target.result);
-      if (Array.isArray(data)) {
-        students = data;
+      const text = ev.target.result;
+      const parsed = parseCSV(text);
+      if (parsed.length > 0) {
+        students = parsed;
         saveStudents();
         render();
-        showToast(`📥 ${data.length}명의 학생 데이터를 가져왔습니다`);
+        showToast(`📥 ${parsed.length}명의 학생 데이터를 가져왔습니다`);
       } else {
-        showToast('⚠️ 올바른 JSON 형식이 아닙니다');
+        showToast('⚠️ 유효한 데이터가 없습니다. 형식을 확인하세요.');
       }
     } catch (err) {
       showToast('⚠️ 파일을 읽을 수 없습니다');
@@ -441,6 +446,70 @@ document.getElementById('fileInput').addEventListener('change', (e) => {
   reader.readAsText(file);
   e.target.value = '';
 });
+
+function parseCSV(text) {
+  const normalized = text.replace(/^\ufeff/, '').replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+  const lines = normalized.split('\n').filter(l => l.trim() !== '');
+  if (lines.length === 0) return [];
+
+  let startIdx = 0;
+  const first = lines[0].toLowerCase();
+  if (first.includes('이름') || first.includes('name') || first.includes('주소') || first.includes('url')) {
+    startIdx = 1;
+  }
+
+  const result = [];
+  for (let i = startIdx; i < lines.length; i++) {
+    const parts = parseCSVLine(lines[i]);
+    if (parts.length >= 2) {
+      const name = parts[0].trim();
+      const url = parts[1].trim();
+      if (name && url) {
+        result.push({ name, url });
+      }
+    }
+  }
+  return result;
+}
+
+function parseCSVLine(line) {
+  const result = [];
+  let current = '';
+  let inQuotes = false;
+  for (let i = 0; i < line.length; i++) {
+    const c = line[i];
+    if (c === '"') {
+      if (inQuotes && line[i + 1] === '"') {
+        current += '"';
+        i++;
+      } else {
+        inQuotes = !inQuotes;
+      }
+    } else if (c === ',' && !inQuotes) {
+      result.push(current);
+      current = '';
+    } else {
+      current += c;
+    }
+  }
+  result.push(current);
+  return result;
+}
+
+function toCSV(list) {
+  const lines = ['이름,주소'];
+  for (const s of list) {
+    lines.push(`${quoteIfNeeded(s.name || '')},${quoteIfNeeded(s.url || '')}`);
+  }
+  return lines.join('\n');
+}
+
+function quoteIfNeeded(s) {
+  if (/[,"\n]/.test(s)) {
+    return '"' + s.replace(/"/g, '""') + '"';
+  }
+  return s;
+}
 
 let toastTimeout;
 function showToast(msg) {
